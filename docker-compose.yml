@@ -16,6 +16,7 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://shiftpilot:change-me-before-deployment@db:5432/shiftpilot}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
       - "8000:8000"
     depends_on:
