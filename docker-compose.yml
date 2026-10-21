@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shiftpilot}
+      POSTGRES_USER: ${POSTGRES_USER:-shiftpilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-before-deployment}
+    volumes:
+      - shiftpilot_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shiftpilot} -d ${POSTGRES_DB:-shiftpilot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://shiftpilot:change-me-before-deployment@db:5432/shiftpilot}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build: ./frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+volumes:
+  shiftpilot_db:
